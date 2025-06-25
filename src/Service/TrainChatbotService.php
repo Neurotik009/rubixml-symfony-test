@@ -4,9 +4,12 @@ namespace App\Service;
 
 use App\Helper\CsvReaderHelper;
 use Rubix\ML\Classifiers\KNearestNeighbors;
+use Rubix\ML\CrossValidation\Metrics\Accuracy;
+use Rubix\ML\Datasets\Unlabeled;
 use Rubix\ML\Kernels\Distance\Manhattan;
 use Rubix\ML\Transformers\MultibyteTextNormalizer;
 use Rubix\ML\Transformers\WordCountVectorizer;
+use stdClass;
 use Symfony\Component\Console\Output\OutputInterface;
 use Rubix\ML\Datasets\Labeled;
 use Symfony\Component\Finder\Finder;
@@ -28,7 +31,7 @@ class TrainChatbotService
         $this->dataset = new Labeled(array(), array());
     }
 
-    private function buildDataset(OutputInterface $output, $filename = false): KNearestNeighbors
+    private function buildDataset(OutputInterface $output, $filename = false): stdClass
     {
         $filenames = $this->getFilesFromDirectory($filename);
 
@@ -61,7 +64,11 @@ class TrainChatbotService
             $classifier->train($this->dataset);
         }
 
-        return $classifier;
+        $trainingData = new stdClass();
+        $trainingData->dataset = $this->dataset;
+        $trainingData->classifier = $classifier;
+        $trainingData->vectorizer = $vectorizer;
+        return $trainingData;
     }
 
     public function rebuildDataset(OutputInterface $output): bool
@@ -121,5 +128,28 @@ class TrainChatbotService
         }
 
         return $filenames;
+    }
+
+    public function predict($question): array
+    {
+        $trainedDataset = unserialize(file_get_contents($this->modelPath));
+
+        // Frage in Dataset umwandeln
+        $dataset = new Unlabeled([$question]); // temporäres Label wird benötigt
+
+
+        // Initialize Transformer
+        $transformer = new MultibyteTextNormalizer(false);
+
+        $dataset->apply($trainedDataset->vectorizer);
+        $dataset->apply($transformer);;
+
+        // Generate prediction for question
+        $predictions = $trainedDataset->classifier->predict($dataset);
+
+        $metric = new Accuracy();
+
+        $score = $metric->score($predictions, [$question]);
+        return ['prediction' => $predictions, 'score' => $score];
     }
 }

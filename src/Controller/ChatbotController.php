@@ -15,4 +15,10 @@ final class ChatbotController extends AbstractController
             'controller_name' => 'ChatbotController',
         ]);
     }
+
+    #[Route('/chatbot/predict', name: 'app_chatbot_predict')]
+    public function predict(): Response
+    {
+        return $this->render('chatbot/predict.html.twig');
+    }
 }

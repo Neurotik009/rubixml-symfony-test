@@ -2,13 +2,16 @@
 
 namespace App\Controller;
 
+use App\Service\TrainChatbotService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\BufferedOutput;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\KernelInterface;
-use Symfony\Component\Routing\Attribute\Route;
 
 /**
  * Class for training and testing the ml-model
@@ -74,9 +77,29 @@ final class MachineLearningController extends AbstractController
 
 
 
-    #[Route('/machine_learning/predict', name: 'app_chatbot_predict')]
-    public function predict(): Response
+    #[Route('/machine_learning/predict', name: 'api_chatbot_predict')]
+    public function apiPredict(Request $request): JsonResponse
     {
-        return $this->render('chatbot/predict.html.twig', []);
+        try {
+            // Request-Daten als JSON empfangen
+            $data = json_decode($request->getContent(), true);
+
+            if (!$data) {
+                throw new \Exception('Ungültige JSON-Daten');
+            }
+
+            $predictionService = new TrainChatbotService();
+            // Hier können Sie Ihre ML-Vorhersagelogik implementieren
+            $prediction = $predictionService->predict($data);
+
+            return new JsonResponse($prediction);
+
+        } catch (\Exception $e) {
+            return new JsonResponse([
+                'status' => 'error',
+                'message' => $e->getMessage()
+            ], 400);
+
+        }
     }
 }
