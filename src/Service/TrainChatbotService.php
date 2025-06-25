@@ -4,7 +4,9 @@ namespace App\Service;
 
 use App\Helper\CsvReaderHelper;
 use Rubix\ML\Classifiers\KNearestNeighbors;
+use Rubix\ML\CrossValidation\KFold;
 use Rubix\ML\CrossValidation\Metrics\Accuracy;
+use Rubix\ML\CrossValidation\Metrics\FBeta;
 use Rubix\ML\Datasets\Unlabeled;
 use Rubix\ML\Kernels\Distance\Manhattan;
 use Rubix\ML\Transformers\MultibyteTextNormalizer;
@@ -151,5 +153,40 @@ class TrainChatbotService
 
         $score = $metric->score($predictions, [$question]);
         return ['predictions' => $predictions, 'score' => $score];
+    }
+
+    public function validate(): array
+    {
+        // Get Trainng Data
+        $trainedDataset = unserialize(file_get_contents($this->modelPath));
+
+        $questions = ['Wie erkenne ich, dass meine Katze angst vor Fremden hat?', 'Angst vor Fremden?', 'Wieviel schlafen Katzen am Tag?', 'Wie lange schlafen Katzen am Tag?', 'Was essen Katzen am Tag?', 'Wieviel essen Katzen am Tag?'];
+        $labels = ['cat_fear_strangers', 'cat_fear_strangers', 'cat_amount_sleeping', 'cat_amount_sleeping', 'cat_food_amount', 'cat_food_amount'];
+
+
+        $dataset = new Labeled($questions, $labels);
+
+        // Create Estimator, Vectorizer and Transformer
+        $estimator = $trainedDataset->classifier;
+        $vectorizer = $trainedDataset->vectorizer;
+        $transformer = new MultibyteTextNormalizer(false);
+
+        // Transform Data
+        $dataset->apply($vectorizer);
+        $dataset->apply($transformer);
+
+        // Get prediction
+        $predictions = $estimator->predict($dataset);
+
+        // Create Metrics
+        $f1Metric = new FBeta(1.0);
+        $accuracyMetric = new Accuracy();
+
+        // Calculate Metrics
+        return [
+            'accuracy' => $accuracyMetric->score($predictions, $labels),
+            'f1' => $f1Metric->score($predictions, $labels),
+
+        ];
     }
 }
