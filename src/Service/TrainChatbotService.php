@@ -17,6 +17,11 @@ use Rubix\ML\Datasets\Labeled;
 use Symfony\Component\Finder\Finder;
 use Rubix\ML\Tokenizers\Word;
 
+/**
+ * Needs tons of training data, accuracy is almost zero
+ *
+ * TODO: Add Training Questions and Testing Data
+ */
 class TrainChatbotService
 {
     // Where the model file is saved
@@ -157,6 +162,10 @@ class TrainChatbotService
 
     public function validate(): array
     {
+        /**
+         * Missing tons of training data and testing data but is already working some
+         */
+
         // Get Trainng Data
         $trainedDataset = unserialize(file_get_contents($this->modelPath));
 
@@ -184,9 +193,8 @@ class TrainChatbotService
 
         // Calculate Metrics
         return [
-            'accuracy' => $accuracyMetric->score($predictions, $labels),
-            'f1' => $f1Metric->score($predictions, $labels),
-
+            'accuracy' => round($accuracyMetric->score($predictions, $labels) * 100, 2),
+            'f1' => round($f1Metric->score($predictions, $labels) * 100, 2),
         ];
     }
 }
