@@ -55,18 +55,16 @@
 
                     const data = await response.json();
 
-                    if (data.status === 'success') {
-                        responseDiv.innerHTML = `
-                <div class="alert alert-success">
-                    <strong>Antwort:</strong><br>
-                    ${data.answer}<br><br>
-                    <small>Konfidenz: ${(data.confidence * 100).toFixed(2)}%</small>
-                </div>`;
-                    } else {
-                        responseDiv.innerHTML = `
-                <div class="alert alert-danger">
-                    <strong>Fehler:</strong> ${data.message}
-                </div>`;
+                    if (response.statusText.toLowerCase() === 'ok') {
+                        let predictionsHtml = '<div class="alert alert-success"><strong>Antwort:</strong><br>';
+
+                        data.predictions.forEach(function(prediction) {
+                            predictionsHtml += `${prediction}<br><br>`;
+                        });
+
+                        predictionsHtml += `<small>Konfidenz: ${(data.score * 100).toFixed(2)}%</small></div>`;
+
+                        responseDiv.innerHTML = predictionsHtml;
                     }
                 } catch (error) {
                     responseDiv.innerHTML = `

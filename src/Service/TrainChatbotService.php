@@ -134,7 +134,7 @@ class TrainChatbotService
     {
         $trainedDataset = unserialize(file_get_contents($this->modelPath));
 
-        // Frage in Dataset umwandeln
+        // Generate dataset from question and transform from string to numersical
         $dataset = new Unlabeled([$question]); // temporäres Label wird benötigt
 
 
@@ -150,6 +150,6 @@ class TrainChatbotService
         $metric = new Accuracy();
 
         $score = $metric->score($predictions, [$question]);
-        return ['prediction' => $predictions, 'score' => $score];
+        return ['predictions' => $predictions, 'score' => $score];
     }
 }
