@@ -57,7 +57,6 @@
 
                     if (response.status === 200) {
                         let predictionsHtml = '<div class="alert alert-success"><strong>Antwort:</strong><br>';
-                        console.log(data.predictions);
                         data.predictions.predictions.forEach(function(prediction) {
                             predictionsHtml += `${prediction}<br><br>`;
                         });
@@ -68,7 +67,6 @@
                         responseDiv.innerHTML = predictionsHtml;
                     }
                 } catch (error) {
-                    console.error(error);
                     responseDiv.innerHTML = `
             <div class="alert alert-danger">
                 <strong>Fehler:</strong> Es ist ein Fehler aufgetreten. Bitte versuchen Sie es später erneut.
