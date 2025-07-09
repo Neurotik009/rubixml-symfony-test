@@ -210,15 +210,14 @@ class ChatbotService
     {
         $trainedDataset = unserialize(file_get_contents($this->modelPath));
 
-        // Generate dataset from question and transform from string to numersical
-        $dataset = new Unlabeled([$question]); // temporäres Label wird benötigt
-
+        // Generate dataset from question and transform from string to numerical matrix
+        $dataset = new Unlabeled([$question]); // Using Unlabed Question
 
         // Initialize Transformer
         $transformer = new MultibyteTextNormalizer(false);
 
-        $dataset->apply($trainedDataset->vectorizer);
         $dataset->apply($transformer);;
+        $dataset->apply($trainedDataset->vectorizer);
 
         // Generate prediction for question
         $predictions = $trainedDataset->classifier->predict($dataset);

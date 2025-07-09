@@ -13,7 +13,7 @@
                         <form id="predict-form">
                             <div class="form-group">
                                 <label for="question">Ihre Frage:</label>
-                                <textarea class="form-control" id="question" rows="3" required></textarea>
+                                <textarea class="form-control" id="question" rows="3" required name="question"></textarea>
                             </div>
                             <button type="submit" class="btn btn-primary mt-3">Frage senden</button>
                         </form>
@@ -55,18 +55,20 @@
 
                     const data = await response.json();
 
-                    if (response.statusText.toLowerCase() === 'ok') {
+                    if (response.status === 200) {
                         let predictionsHtml = '<div class="alert alert-success"><strong>Antwort:</strong><br>';
-
-                        data.predictions.forEach(function(prediction) {
+                        console.log(data.predictions);
+                        data.predictions.predictions.forEach(function(prediction) {
                             predictionsHtml += `${prediction}<br><br>`;
                         });
 
-                        predictionsHtml += `<small>Konfidenz: ${(data.score * 100).toFixed(2)}%</small></div>`;
+                        predictionsHtml += `<small>Accuracy: ${(data.predictions.accuracy * 100).toFixed(2)}%</small><br />`;
+                        predictionsHtml += `<small>FBeta: ${(data.predictions.f1 * 100).toFixed(2)}%</small></div>`;
 
                         responseDiv.innerHTML = predictionsHtml;
                     }
                 } catch (error) {
+                    console.error(error);
                     responseDiv.innerHTML = `
             <div class="alert alert-danger">
                 <strong>Fehler:</strong> Es ist ein Fehler aufgetreten. Bitte versuchen Sie es später erneut.

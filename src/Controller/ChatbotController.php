@@ -4,7 +4,7 @@ namespace App\Controller;
 
 use App\Command\ChatbotTrainCommand;
 use App\Service\ChatbotService;
-use http\Client\Request;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Input\ArrayInput;
@@ -52,9 +52,13 @@ final class ChatbotController extends AbstractController
     public function sendPredict(Request $request): JsonResponse
     {
         $validator = new ChatbotService();
+
+        $content = $request->getContent();
+        $data = json_decode($content, true);
+
         return new JsonResponse(
             [
-                'predictions' => $validator->predict($request->request->get('message'))
+                'predictions' => $validator->predict($data['question'])
             ]
         );
     }
