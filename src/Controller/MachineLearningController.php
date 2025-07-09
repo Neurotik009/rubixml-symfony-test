@@ -2,7 +2,7 @@
 
 namespace App\Controller;
 
-use App\Service\TrainChatbotService;
+use App\Service\ChatbotService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Input\ArrayInput;
@@ -27,7 +27,7 @@ final class MachineLearningController extends AbstractController
     }
 
 
-    #[Route('/machine_learning/train/{rebuild}', name: 'app_chatbot_train')]
+    #[Route('/machine_learning/train/{rebuild}', name: 'app_ml_train')]
     public function train(KernelInterface $kernel, $rebuild): Response
     {
         // Initialize Application
@@ -51,7 +51,7 @@ final class MachineLearningController extends AbstractController
         }
     }
 
-    #[Route('/machine_learning/train/{rebuiild}/{filename}', name: 'app_chatbot_add_train')]
+    #[Route('/machine_learning/train/{rebuiild}/{filename}', name: 'app_ml_add_train')]
     public function addTrain(KernelInterface $kernel, $rebuild): Response
     {
         // Initialize Application
@@ -75,8 +75,6 @@ final class MachineLearningController extends AbstractController
         }
     }
 
-
-
     #[Route('/machine_learning/predict', name: 'api_chatbot_predict')]
     public function apiPredict(Request $request): JsonResponse
     {
@@ -88,7 +86,7 @@ final class MachineLearningController extends AbstractController
                 throw new \Exception('Ungültige JSON-Daten');
             }
 
-            $predictionService = new TrainChatbotService();
+            $predictionService = new ChatbotService();
             // Hier können Sie Ihre ML-Vorhersagelogik implementieren
             $prediction = $predictionService->predict($data);
 

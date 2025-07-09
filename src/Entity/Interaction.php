@@ -2,12 +2,15 @@
 
 namespace App\Entity;
 
+use App\Entity\Trait\TimestampableTrait;
 use App\Repository\InteractionRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: InteractionRepository::class)]
 class Interaction
 {
+    use TimestampableTrait;
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -21,6 +24,12 @@ class Interaction
 
     #[ORM\Column]
     private ?int $rating = null;
+
+
+    public function __construct()
+    {
+        $this->initializeTimestamps();
+    }
 
     public function getId(): ?int
     {

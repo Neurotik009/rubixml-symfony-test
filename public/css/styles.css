@@ -1,0 +1,34 @@
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex: 1;
+}
+
+.footer {
+    margin-top: auto;
+}
+
+.navbar {
+    margin-bottom: 1rem;
+}
+
+.role-choices {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 25px;
+}
+
+.role-choices label {
+    display: flex;
+}
+
+.role-choices input {
+    display: flex;
+    top: 30px;
+    position: relative;
+}

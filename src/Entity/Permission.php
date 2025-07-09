@@ -3,11 +3,11 @@
 namespace App\Entity;
 
 use App\Entity\Trait\TimestampableTrait;
-use App\Repository\ItemRepository;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: ItemRepository::class)]
-class Item
+#[ORM\Entity]
+class Permission
 {
     use TimestampableTrait;
     #[ORM\Id]
@@ -18,8 +18,8 @@ class Item
     #[ORM\Column(length: 255)]
     private ?string $name = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $description = null;
+    #[ORM\ManyToMany(targetEntity: Role::class)]
+    private Collection $role;
 
     public function __construct()
     {
@@ -36,22 +36,7 @@ class Item
         return $this->name;
     }
 
-    public function setName(string $name): static
-    {
+    public function setName(string $name): void {
         $this->name = $name;
-
-        return $this;
-    }
-
-    public function getDescription(): ?string
-    {
-        return $this->description;
-    }
-
-    public function setDescription(?string $description): static
-    {
-        $this->description = $description;
-
-        return $this;
     }
 }

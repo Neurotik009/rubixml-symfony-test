@@ -2,27 +2,51 @@
 
 namespace App\DataFixtures;
 
+use App\Entity\Role;
 use App\Entity\User;
 use App\Entity\Item;
 use App\Entity\Interaction;
 use Doctrine\Bundle\FixturesBundle\Fixture;
+use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
-class AppFixtures extends Fixture
+class RecommendationFixtures extends Fixture implements DependentFixtureInterface
 {
+    public function __construct(
+        private UserPasswordHasherInterface $passwordHasher
+    ) {}
+
+    public function getDependencies() : array
+    {
+        return [
+            RoleFixtures::class, // Ihre Role Fixtures-Klasse
+        ];
+    }
+
     public function load(ObjectManager $manager): void
     {
-        // Create 5 users
+        $userRole = $manager->getRepository(Role::class)->findOneBy(['name' => 'ROLE_USER']);
+
+        // Create 25 users
         for ($i = 1; $i <= 25; $i++) {
             $user = new User();
-            $user->setUsername('user' . $i);
             $user->setEmail('user' . $i . '@example.com');
+            $user->addRole($userRole);
+
+            $hashedPassword = $this->passwordHasher->hashPassword(
+                $user,
+                'test'
+            );
+
+            $user->setPassword($hashedPassword);
+
             $manager->persist($user);
             // Store a reference to use in interactions
             $this->addReference('user_' . $i, $user);
         }
 
-        // Create 10 items
+        // Create 1000 items
         for ($i = 1; $i <= 1000; $i++) {
             $item = new Item();
             $item->setName('Item ' . $i);
@@ -35,12 +59,11 @@ class AppFixtures extends Fixture
         // Flush to ensure users and items are saved before creating interactions
         $manager->flush();
 
-        // Create interactions (each user rates 500 items)
+        // Create interactions for users
         for ($u = 1; $u <= 25; $u++) {
             $user = $this->getReference('user_' . $u, User::class);
 
-            for ($i = $u; $i < $u + 500; $i++) {
-                // Wrap around item indices to stay within 1-10
+            for ($i = $u; $i < $u + 1000; $i++) {
                 $itemIndex = ($i - 1) % 1000 + 1;
                 $item = $this->getReference('item_' . $itemIndex, Item::class);
 

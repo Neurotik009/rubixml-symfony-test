@@ -43,7 +43,7 @@
                 try {
                     responseDiv.innerHTML = 'Verarbeite Anfrage...';
 
-                    const response = await fetch('{{ path('api_chatbot_predict') }}', {
+                    const response = await fetch('{{ path('api_post_chatbot_predict') }}', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',

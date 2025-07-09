@@ -8,17 +8,35 @@ use Rubix\ML\Datasets\Labeled;
 use Rubix\ML\Datasets\Unlabeled;
 use Rubix\ML\Regressors\KNNRegressor;
 
+/**
+ * Just a small exemple to test different Regressors
+ */
 class RecommendationService
 {
+    /**
+     * @var InteractionRepository
+     */
     private InteractionRepository $interactionRepository;
+    /**
+     * @var ItemRepository
+     */
     private ItemRepository $itemRepository;
 
+    /**
+     * @param InteractionRepository $interactionRepository
+     * @param ItemRepository $itemRepository
+     */
     public function __construct(InteractionRepository $interactionRepository, ItemRepository $itemRepository)
     {
         $this->interactionRepository = $interactionRepository;
         $this->itemRepository = $itemRepository;
     }
 
+    /**
+     * Returns the current dataset
+     *
+     * @return Labeled
+     */
     public function getDataset(): Labeled
     {
         $interactions = $this->interactionRepository->findAll();
@@ -33,6 +51,11 @@ class RecommendationService
         return new Labeled($samples, $labels);
     }
 
+    /**
+     * Trains the Model
+     *
+     * @return KNNRegressor
+     */
     public function trainModel(): KNNRegressor
     {
         $dataset = $this->getDataset();
@@ -41,6 +64,14 @@ class RecommendationService
         return $estimator;
     }
 
+    /**
+     * Get the Recommendations from a user
+     * and put in an Unlabeled dataset
+     *
+     * @param int $userId
+     * @param int $numRecommendations
+     * @return array
+     */
     public function getRecommendations(int $userId, int $numRecommendations = 500): array
     {
         $model = $this->trainModel();

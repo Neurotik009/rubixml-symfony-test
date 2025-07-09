@@ -1,0 +1,59 @@
+<a class="navbar-brand" href="{{ path('app_home') }}">Meine App</a>
+<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain"
+        aria-controls="navbarMain" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+</button>
+
+<div class="collapse navbar-collapse" id="navbarMain">
+    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+            <a class="nav-link {% if app.request.attributes.get('_route') == 'app_home' %}active{% endif %}"
+               href="{{ path('app_home') }}">Home</a>
+        </li>
+        {% if is_granted('ROLE_ADMIN') %}
+            <li class="nav-item">
+                <a class="nav-link {% if 'admin' in app.request.attributes.get('_route') %}active{% endif %}"
+                   href="{{ path('admin_users_index') }}">Admin</a>
+            </li>
+        {% endif %}
+        {% if is_granted('predict_chatbot') %}
+            <li class="nav-item">
+                <a class="nav-link" href="{{ path('app_chatbot_predict') }}">Chatbot</a>
+            </li>
+        {% endif %}
+
+        {% if is_granted('train_chatbot') %}
+            <li class="nav-item">
+                <a class="nav-link" href="{{ path('app_chatbot_train') }}">Train Chatbot</a>
+            </li>
+        {% endif %}
+
+        {% if is_granted('validate_chatbot') %}
+            <li class="nav-item">
+                <a class="nav-link" href="{{ path('app_chatbot_validate') }}">Validate Chatbot</a>
+            </li>
+        {% endif %}
+
+    </ul>
+
+    <ul class="navbar-nav">
+        {% if app.user %}
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                   data-bs-toggle="dropdown" aria-expanded="false">
+                    {{ app.user.email }}
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                    <li><a class="dropdown-item" href="{{ path('app_profile') }}">Profil</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="{{ path('app_logout') }}">Abmelden</a></li>
+                </ul>
+            </li>
+        {% else %}
+            <li class="nav-item">
+                <a class="nav-link {% if app.request.attributes.get('_route') == 'app_login' %}active{% endif %}"
+                   href="{{ path('app_login') }}">Anmelden</a>
+            </li>
+        {% endif %}
+    </ul>
+</div>

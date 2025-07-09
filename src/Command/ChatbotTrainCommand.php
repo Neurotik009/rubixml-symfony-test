@@ -3,7 +3,7 @@
 namespace App\Command;
 
 use AllowDynamicProperties;
-use App\Service\TrainChatbotService;
+use App\Service\ChatbotService;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -18,9 +18,9 @@ use Symfony\Component\Console\Output\OutputInterface;
 class ChatbotTrainCommand extends Command
 {
     public function __construct(
-        TrainChatbotService $trainChatbotService
+        ChatbotService $chatbotService
     ) {
-        $this->trainChatbotService = $trainChatbotService;
+        $this->chatbotService = $chatbotService;
         parent::__construct();
     }
 
@@ -37,10 +37,10 @@ class ChatbotTrainCommand extends Command
 
     public function execute(InputInterface $input, OutputInterface $output): int
     {
-        if($input->getArgument('rebuild') === "1") {
-            $status = $this->trainChatbotService->rebuildDataset($output);
+        if($input->getArgument('rebuild') === 1) {
+            $status = $this->chatbotService->rebuildDataset($output);
         } else {
-            $status = $this->trainChatbotService->addToDataset($output, $input->getArgument('file'));
+            $status = $this->chatbotService->addToDataset($output, $input->getArgument('file'));
         }
 
         return $status ? Command::SUCCESS : Command::FAILURE;

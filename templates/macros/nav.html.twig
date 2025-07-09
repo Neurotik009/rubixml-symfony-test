@@ -1,0 +1,3 @@
+{% macro is_active(expected_route, actual_route) %}
+    {% if expected_route == actual_route %}active{% endif %}
+{% endmacro %}

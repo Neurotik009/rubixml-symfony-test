@@ -4,7 +4,6 @@ namespace App\Service;
 
 use App\Helper\CsvReaderHelper;
 use Rubix\ML\Classifiers\KNearestNeighbors;
-use Rubix\ML\CrossValidation\KFold;
 use Rubix\ML\CrossValidation\Metrics\Accuracy;
 use Rubix\ML\CrossValidation\Metrics\FBeta;
 use Rubix\ML\Datasets\Unlabeled;
@@ -22,22 +21,65 @@ use Rubix\ML\Tokenizers\Word;
  *
  * TODO: Add Training Questions and Testing Data
  */
-class TrainChatbotService
+class ChatbotService
 {
     // Where the model file is saved
+    /**
+     * @var string
+     */
     private string $modelPath = __DIR__ . '/../../var/model/chatbot_model.rbx';
 
     // Where the training data is found
+    /**
+     * @var string
+     */
     private string $datasetFilePath = __DIR__ . '/../../var/train_data/';
 
     // The initializing the dataset of type Labeled
+    /**
+     * @var Labeled
+     */
     private Labeled $dataset;
 
+    private float $accuracy = 0.0;
+
+    private float $f1 = 0.0;
+
+
+    /**
+     * Gets the accuracy of the last validation
+     *
+     * @return float
+     */
+    public function getAccuracy(): float
+    {
+        return round($this->accuracy * 100, 2);
+    }
+
+    /**
+     * Gets the F1 accuracy of the previous validation
+     * @return float
+     */
+    public function getF1(): float
+    {
+        return round($this->f1 * 100, 2);
+    }
+
+    /**
+     *
+     */
     public function __construct()
     {
         $this->dataset = new Labeled(array(), array());
     }
 
+    /**
+     * Builds a dataset for the Chatbot from training files from the train_data folder
+     *
+     * @param OutputInterface $output
+     * @param $filename
+     * @return stdClass
+     */
     private function buildDataset(OutputInterface $output, $filename = false): stdClass
     {
         $filenames = $this->getFilesFromDirectory($filename);
@@ -78,6 +120,12 @@ class TrainChatbotService
         return $trainingData;
     }
 
+    /**
+     * rebuilds and adds the train data of files
+     *
+     * @param OutputInterface $output
+     * @return bool
+     */
     public function rebuildDataset(OutputInterface $output): bool
     {
         $classifier = $this->buildDataset($output);
@@ -93,6 +141,13 @@ class TrainChatbotService
         }
     }
 
+    /**
+     * adds data from a single train data file
+     *
+     * @param OutputInterface $output
+     * @param $filename
+     * @return bool
+     */
     public function addToDataset(OutputInterface $output, $filename): bool
     {
         $classifier = $this->buildDataset($output, $filename);
@@ -102,6 +157,7 @@ class TrainChatbotService
         $trainedDataset->merge($this->dataset);
 
         // Train the model
+        // Error Message: unknown class for IDE but works
         $classifier->train($trainedDataset);
 
         // Save the new model
@@ -116,6 +172,13 @@ class TrainChatbotService
         }
     }
 
+    /**
+     * reads all files in train_data directory and
+     * puts them in an array to be read later
+     *
+     * @param $filename
+     * @return array
+     */
     private function getFilesFromDirectory($filename): array
     {
         $filenames = [];
@@ -137,6 +200,12 @@ class TrainChatbotService
         return $filenames;
     }
 
+    /**
+     * predicts from a single question
+     *
+     * @param $question
+     * @return array
+     */
     public function predict($question): array
     {
         $trainedDataset = unserialize(file_get_contents($this->modelPath));
@@ -154,30 +223,44 @@ class TrainChatbotService
         // Generate prediction for question
         $predictions = $trainedDataset->classifier->predict($dataset);
 
+        // calculate Accuracy of Prediction
         $metric = new Accuracy();
+        $this->accuracy = $metric->score($predictions, [$question]);
 
-        $score = $metric->score($predictions, [$question]);
-        return ['predictions' => $predictions, 'score' => $score];
+        // Calculate FBeta of Prediction
+        $f1Metric = new FBeta(1.0);
+        $this->f1 = $f1Metric->score($predictions, [$question]);
+
+        return [
+            'predictions' => $predictions,
+            'accuracy' => round($this->accuracy * 100, 2),
+            'f1' => round($this->f1 * 100, 2),
+        ];
     }
 
+    /**
+     * validates a set of questions for measuring
+     * the training data's quality
+     *
+     * @return array
+     */
     public function validate(): array
     {
-        /**
-         * Missing tons of training data and testing data but is already working some
-         */
-
         // Get Trainng Data
         $trainedDataset = unserialize(file_get_contents($this->modelPath));
 
-        $questions = ['Wie erkenne ich, dass meine Katze angst vor Fremden hat?', 'Angst vor Fremden?', 'Wieviel schlafen Katzen am Tag?', 'Wie lange schlafen Katzen am Tag?', 'Was essen Katzen am Tag?', 'Wieviel essen Katzen am Tag?'];
-        $labels = ['cat_fear_strangers', 'cat_fear_strangers', 'cat_amount_sleeping', 'cat_amount_sleeping', 'cat_food_amount', 'cat_food_amount'];
+        $questions = ['Wie oft muss ich meine Katze füttern??', 'Wieviel und wie oft sollte ich meine Katze füttern?', 'Wie häuftig sollte ich meine Katze füttern??', 'Kann ich meiner Katze Milch geben?', 'Dürfen Katzen Milch trinken?', 'Wie sieht es mit Katzen und Milch aus?'];
+        $labels = ['cat_feed_amount', 'cat_feed_amount', 'cat_feed_amount', 'cat_milk_allowed', 'cat_milk_allowed', 'cat_milk_allowed'];
 
-
+        // Questions are a separate array
+        // Error suggestion is wrong
         $dataset = new Labeled($questions, $labels);
 
         // Create Estimator, Vectorizer and Transformer
         $estimator = $trainedDataset->classifier;
         $vectorizer = $trainedDataset->vectorizer;
+
+        // Transformer tests
         $transformer = new MultibyteTextNormalizer(false);
 
         // Transform Data
