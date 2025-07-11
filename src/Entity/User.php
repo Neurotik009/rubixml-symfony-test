@@ -107,4 +107,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         // Needed for UserInterface
     }
+
+    public function getPermissions(): array
+    {
+        $permissions = [];
+        foreach ($this->roles as $role) {
+            foreach ($role->getPermissions() as $permission) {
+                $permissions[] = $permission->getName();
+            }
+        }
+        return array_unique($permissions);
+    }
 }

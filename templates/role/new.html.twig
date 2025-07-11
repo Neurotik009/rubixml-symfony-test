@@ -1,0 +1,14 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Neue Rolle{% endblock %}
+
+{% block body %}
+    <h1>Neue Rolle erstellen</h1>
+
+    {{ form_start(form) }}
+    {{ form_widget(form) }}
+    <button class="btn btn-primary">Erstellen</button>
+    {{ form_end(form) }}
+
+    <a href="{{ path('app_role_index') }}" class="btn btn-secondary mt-3">Zurück zur Liste</a>
+{% endblock %}

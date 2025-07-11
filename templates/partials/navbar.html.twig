@@ -15,6 +15,18 @@
                 <a class="nav-link {% if 'admin' in app.request.attributes.get('_route') %}active{% endif %}"
                    href="{{ path('admin_users_index') }}">Admin</a>
             </li>
+            <li class="nav-item">
+                <a class="nav-link {% if 'admin' in app.request.attributes.get('_route') %}active{% endif %}"
+                   href="{{ path('admin_users_index') }}">Admin</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if 'admin' in app.request.attributes.get('_route') %}active{% endif %}"
+                   href="{{ path('app_role_index') }}">Roles</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if 'admin' in app.request.attributes.get('_route') %}active{% endif %}"
+                   href="{{ path('admin_users_index') }}">Role Users</a>
+            </li>
         {% endif %}
         {% if is_granted('predict_chatbot') %}
             <li class="nav-item">

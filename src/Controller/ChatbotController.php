@@ -28,6 +28,9 @@ final class ChatbotController extends AbstractController
     #[Route('/chatbot', name: 'app_chatbot', methods: ['GET'])]
     public function index(): Response
     {
+        if(!in_array('view_chatbot', $this->getUser()->getPermissions())) {
+            return $this->redirectToRoute('app_home');
+        }
         return $this->render('chatbot/index.html.twig', [
             'controller_name' => 'ChatbotController',
         ]);
@@ -41,6 +44,9 @@ final class ChatbotController extends AbstractController
     #[Route('/chatbot/predict', name: 'app_chatbot_predict', methods: ['GET'])]
     public function predict(): Response
     {
+        if(!in_array('predict_chatbot', $this->getUser()->getPermissions())) {
+            return $this->redirectToRoute('app_home');
+        }
         return $this->render('chatbot/predict.html.twig');
     }
 
@@ -51,6 +57,9 @@ final class ChatbotController extends AbstractController
     #[Route('/chatbot/predict', name: 'api_post_chatbot_predict', methods: ['POST'])]
     public function sendPredict(Request $request): JsonResponse
     {
+        if(!in_array('predict_chatbot', $this->getUser()->getPermissions())) {
+            return new JsonResponse(['error' => 'You are not allowed to access this route.']);
+        }
         $validator = new ChatbotService();
 
         $content = $request->getContent();
@@ -69,6 +78,9 @@ final class ChatbotController extends AbstractController
     #[Route('/chatbot/validate', name: 'app_chatbot_validate', methods: ['GET'])]
     public function validate(): Response
     {
+        if(!in_array('validate_chatbot', $this->getUser()->getPermissions())) {
+            return $this->redirectToRoute('app_home');
+        }
         $validator = new ChatbotService();
         return $this->render('chatbot/validate.html.twig', ['validate' => $validator->validate()]);
     }
@@ -80,6 +92,9 @@ final class ChatbotController extends AbstractController
     #[Route('/chatbot/train', name: 'app_chatbot_train', methods: ['GET'])]
     public function train(KernelInterface $kernel): Response
     {
+        if(!in_array('train_chatbot', $this->getUser()->getPermissions())) {
+            return $this->redirectToRoute('app_home');
+        }
         // Initialize Application
         $kernel->boot();
         $application = new Application();
@@ -111,6 +126,9 @@ final class ChatbotController extends AbstractController
     #[Route('/chatbot/train/{rebuild}/{filename}', name: 'app_chatbot_add_train', methods: ['GET'])]
     public function addTrain(KernelInterface $kernel, $rebuild): Response
     {
+        if(!in_array('train_chatbot', $this->getUser()->getPermissions())) {
+            return $this->redirectToRoute('app_home');
+        }
         // Initialize Application
         $kernel->boot();
         $application = new Application();

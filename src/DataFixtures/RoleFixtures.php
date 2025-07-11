@@ -64,29 +64,38 @@ class RoleFixtures extends Fixture
 
         // Create Permissions for Roles
         $viewRoleToUsers = new Permission();
-        $viewRoleToUsers->setName('view_role_users');
+        $viewRoleToUsers->setName('view_role');
         $manager->persist($viewRoleToUsers);
 
         $createRoles = new Permission();
-        $createRoles->setName('create_roles');
+        $createRoles->setName('create_role');
         $manager->persist($createRoles);
 
         $editRoles = new Permission();
-        $editRoles->setName('edit_roles');
+        $editRoles->setName('edit_role');
         $manager->persist($editRoles);
 
         $deleteRoles = new Permission();
-        $deleteRoles->setName('delete_roles');
+        $deleteRoles->setName('delete_role');
         $manager->persist($deleteRoles);
 
         // Create Role to User Permissions
         $addRoleToUsers = new Permission();
-        $addRoleToUsers->setName('add_role_users');
+        $addRoleToUsers->setName('add_role_user');
         $manager->persist($addRoleToUsers);
 
         $removeRoleFromUsers = new Permission();
-        $removeRoleFromUsers->setName('remove_role_users');
+        $removeRoleFromUsers->setName('remove_role_user');
         $manager->persist($removeRoleFromUsers);
+
+        // Permisson to Role
+        $addPermissionToRole = new Permission();
+        $addPermissionToRole->setName('add_permission_role');
+        $manager->persist($addPermissionToRole);
+
+        $removePermissionToRole = new Permission();
+        $removePermissionToRole->setName('remove_permission_role');
+        $manager->persist($removePermissionToRole);
 
         // Create all Roles
 
@@ -103,6 +112,8 @@ class RoleFixtures extends Fixture
         $adminRole->getPermissions()->add($deleteRoles);
         $adminRole->getPermissions()->add($addRoleToUsers);
         $adminRole->getPermissions()->add($removeRoleFromUsers);
+        $adminRole->getPermissions()->add($addPermissionToRole);
+        $adminRole->getPermissions()->add($removePermissionToRole);
 
         $manager->persist($adminRole);
 

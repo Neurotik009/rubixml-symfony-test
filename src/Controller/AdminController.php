@@ -22,6 +22,9 @@ final class AdminController extends AbstractController
         EntityManagerInterface $entityManager,
         PaginatorInterface $paginator
     ): Response {
+        if(!in_array('view_role_users', $this->getUser()->getPermissions())) {
+            return $this->redirectToRoute('app_home');
+        }
         $queryBuilder = $entityManager
             ->getRepository(User::class)
             ->createQueryBuilder('u')
