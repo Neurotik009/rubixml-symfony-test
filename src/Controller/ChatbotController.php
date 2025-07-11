@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Command\ChatbotTrainCommand;
 use App\Service\ChatbotService;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Console\Application;
@@ -17,7 +18,8 @@ use Symfony\Component\Routing\Attribute\Route;
 final class ChatbotController extends AbstractController
 {
     public function __construct(
-        private readonly ChatbotTrainCommand $chatbotTrainCommand
+        private readonly ChatbotTrainCommand $chatbotTrainCommand,
+        private readonly EntityManagerInterface $entityManager,
     ) {}
 
     /**
@@ -60,14 +62,20 @@ final class ChatbotController extends AbstractController
         if(!in_array('predict_chatbot', $this->getUser()->getPermissions())) {
             return new JsonResponse(['error' => 'You are not allowed to access this route.']);
         }
-        $validator = new ChatbotService();
+        $validator = new ChatbotService($this->entityManager);
 
         $content = $request->getContent();
         $data = json_decode($content, true);
 
+        $predictions = $validator->predict($data['question']);
+        $mostLikelyAnswer = $predictions['predictions'][0];
+
+        $answers = $this->entityManager->getRepository('App\Entity\ChatbotAnswer')->findBy(['label' => $mostLikelyAnswer]);
+
         return new JsonResponse(
             [
-                'predictions' => $validator->predict($data['question'])
+                'predictions' => $predictions,
+                'answer' => $answers[0]->getAnswer(),
             ]
         );
     }
@@ -81,7 +89,7 @@ final class ChatbotController extends AbstractController
         if(!in_array('validate_chatbot', $this->getUser()->getPermissions())) {
             return $this->redirectToRoute('app_home');
         }
-        $validator = new ChatbotService();
+        $validator = new ChatbotService($this->entityManager);
         return $this->render('chatbot/validate.html.twig', ['validate' => $validator->validate()]);
     }
 

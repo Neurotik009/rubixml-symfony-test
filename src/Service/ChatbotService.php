@@ -2,7 +2,9 @@
 
 namespace App\Service;
 
+use App\Entity\ChatbotAnswer;
 use App\Helper\CsvReaderHelper;
+use Doctrine\ORM\EntityManagerInterface;
 use Rubix\ML\Classifiers\KNearestNeighbors;
 use Rubix\ML\CrossValidation\Metrics\Accuracy;
 use Rubix\ML\CrossValidation\Metrics\FBeta;
@@ -45,6 +47,16 @@ class ChatbotService
 
     private float $f1 = 0.0;
 
+    private QuestionService $questionService;
+
+    public function __construct(
+        private readonly EntityManagerInterface $entityManager,
+    )
+    {
+        $this->dataset = new Labeled(array(), array());
+
+        $this->questionService = new QuestionService($entityManager);
+    }
 
     /**
      * Gets the accuracy of the last validation
@@ -63,14 +75,6 @@ class ChatbotService
     public function getF1(): float
     {
         return round($this->f1 * 100, 2);
-    }
-
-    /**
-     *
-     */
-    public function __construct()
-    {
-        $this->dataset = new Labeled(array(), array());
     }
 
     /**
@@ -99,7 +103,10 @@ class ChatbotService
         foreach($filenames as $filename) {
             $output->writeln('Adding dataset from file: ' . $filename);
 
-            [$samples, $labels] = CsvReaderHelper::readCsvFile($filename);
+            [$samples, $labels, $answers] = CsvReaderHelper::readCsvFile($filename);
+
+            // Write answers to database
+            $this->writeAnswersToDatabase(array_unique($answers), array_unique($labels));
 
             // Create Dataset
             $this->dataset = new Labeled($samples, $labels);
@@ -138,6 +145,19 @@ class ChatbotService
         } else {
             $output->writeln('Chatbot was not trained!');
             return false;
+        }
+    }
+
+    public function writeAnswersToDatabase(array $answers, array $labels): void
+    {
+
+
+        foreach($answers as $key => $answer) {
+            $answerEntity = new ChatbotAnswer();
+            $answerEntity->setAnswer($answer);
+            $answerEntity->setLabel($labels[$key]);
+
+            $this->questionService->saveAnswer($answerEntity);
         }
     }
 

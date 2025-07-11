@@ -12,11 +12,12 @@ class CsvReaderHelper
 
         while (($row = fgetcsv($handle)) !== false) {
             $samples[] = $row[0];
+            $answers[] = $row[1];
             $labels[] = $row[2];
         }
 
         fclose($handle);
-        return [$samples, $labels];
+        return [$samples, $labels, $answers];
     }
 
 }

@@ -57,10 +57,7 @@
 
                     if (response.status === 200) {
                         let predictionsHtml = '<div class="alert alert-success"><strong>Antwort:</strong><br>';
-                        data.predictions.predictions.forEach(function(prediction) {
-                            predictionsHtml += `${prediction}<br><br>`;
-                        });
-
+                        predictionsHtml += `${data.answer}<br><br>`;
                         predictionsHtml += `<small>Accuracy: ${(data.predictions.accuracy * 100).toFixed(2)}%</small><br />`;
                         predictionsHtml += `<small>FBeta: ${(data.predictions.f1 * 100).toFixed(2)}%</small></div>`;
 
